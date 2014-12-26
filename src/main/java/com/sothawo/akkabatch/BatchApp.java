@@ -172,12 +172,11 @@ public class BatchApp {
      */
     private void initWriter() throws AkkaBatchException {
         /* the Writer */
-        ActorRef writer = system.actorOf(Props.create(Writer.class), configApp.getString("names.writer"));
-        inbox.send(writer, new InitWriter(outfileName, configApp.getString("charset.outfile")));
+        inbox.send(system.actorOf(Props.create(Writer.class), configApp.getString("names.writer")),
+                   new InitWriter(outfileName, configApp.getString("charset.outfile")));
 
         log.info("waiting for Writer to be initialized...");
         Object msg = inbox.receive(Duration.create(5, TimeUnit.SECONDS));
-
         if (msg instanceof InitResult) {
             InitResult initResult = (InitResult) msg;
             if (!initResult.isSuccess()) {
@@ -212,8 +211,8 @@ public class BatchApp {
         long endTime = System.currentTimeMillis();
         if (msg instanceof WorkDone) {
             System.out.println(MessageFormat.format("result {0}, Elapsed time: {1} ms",
-                                         ((WorkDone) msg).isSuccess() ? "OK" : "Error",
-                                         endTime - startTime)
+                                                    ((WorkDone) msg).isSuccess() ? "OK" : "Error",
+                                                    endTime - startTime)
             );
         } else {
             throw new AkkaBatchException(
